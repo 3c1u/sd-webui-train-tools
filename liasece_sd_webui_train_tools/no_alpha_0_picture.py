@@ -3,14 +3,21 @@ import cv2
 import os
 import numpy as np
 
-def transparency2White(img) -> cv2.Mat:
+def transparency2White(img: cv2.Mat) -> cv2.Mat:
     sp = img.shape
     width = sp[0]
     height = sp[1]
+
+    has_alpha = img.shape[2] == 4
+
+    if not has_alpha:
+        return img
+
     for yh in range(height):
         for xw in range(width):
             color_d = img[xw, yh]
-            if (len(color_d) == 4 and color_d[3] != 255):
+
+            if color_d[3] != 255:
                 alpha = color_d[3] / 255.0
 
                 img[xw, yh] = [
@@ -43,6 +50,8 @@ def rangeAllImage(inputPath, outputPath) -> list[cv2.Mat]:
     res = [cv2.Mat]
     import os
     for (file,img) in readCv2Images(inputPath):
+        if len(img.shape) == 2:
+            img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
         img = transparency2White(img)
         cv2.imwrite(str(os.path.join(outputPath, file)), img)
         # convert to image
